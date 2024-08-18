@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Europe Cancer Patients Map and Bar Chart</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #container {
+            display: flex;
+            height: 600px;
+        }
+        #map {
+            flex: 2;
+            height: 100%;
+        }
+        #chartContainer {
+            flex: 1;
+            padding: 20px;
+            height: 100%;
+        }
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Number of Cancer Patients in European Countries</h1>
+    <div id="container">
+        <div id="map"></div>
+        <div id="chartContainer">
+            <canvas id="barChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var map = L.map('map').setView([54.5260, 15.2551], 4); // Centered on Europe
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 10,
+        }).addTo(map);
+
+        var countries = {
+            "Germany": [51.1657, 10.4515],
+            "France": [46.6034, 1.8883],
+            "Italy": [41.8719, 12.5674],
+            "Spain": [40.4637, -3.7492],
+            "Poland": [51.9194, 19.1451],
+            "United Kingdom": [55.3781, -3.4360],
+            "Netherlands": [52.1326, 5.2913]
+        };
+
+        var data = {
+            "Germany": 4000,
+            "France": 3500,
+            "Italy": 3000,
+            "Spain": 2500,
+            "Poland": 2000,
+            "United Kingdom": 4500,
+            "Netherlands": 1500
+        };
+
+        var colors = {
+            "Germany": 'rgba(255, 99, 132, 0.8)',
+            "France": 'rgba(54, 162, 235, 0.8)',
+            "Italy": 'rgba(255, 206, 86, 0.8)',
+            "Spain": 'rgba(75, 192, 192, 0.8)',
+            "Poland": 'rgba(153, 102, 255, 0.8)',
+            "United Kingdom": 'rgba(255, 159, 64, 0.8)',
+            "Netherlands": 'rgba(100, 100, 255, 0.8)'
+        };
+
+        function addColoredCircle(country, numPatients, color) {
+            L.circle(countries[country], {
+                radius: numPatients * 30, // Proportional but smaller radius
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.8
+            }).addTo(map).bindPopup("<b>" + country + "</b><br>Cancer Patients: " + numPatients);
+        }
+
+        for (var country in data) {
+            addColoredCircle(country, data[country], colors[country]);
+        }
+
+        var ctx = document.getElementById('barChart').getContext('2d');
+        var barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: 'Cancer Patients',
+                    data: Object.values(data),
+                    backgroundColor: Object.values(colors),
+                    borderColor: Object.values(colors).map(color => color.replace('0.8', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
